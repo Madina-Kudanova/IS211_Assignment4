@@ -1,93 +1,66 @@
 import time
 import random
 
+def get_random_list(n):
+    lst = list(range(n))
+    random.shuffle(lst)
+    return lst
 
-def get_me_random_list(n):
-    """Generate list of n elements in random order
-    
-    :params: n: Number of elements in the list
-    :returns: A list with n elements in random order
-    """
-    a_list = list(range(n))
-    random.shuffle(a_list)
-    return a_list
+def insertion_sort(lst):
+    start_time = time.time()
+    for index in range(1, len(lst)):
+        current_value = lst[index]
+        position = index
+        while position > 0 and lst[position - 1] > current_value:
+            lst[position] = lst[position - 1]
+            position -= 1
+        lst[position] = current_value
+    end_time = time.time()
+    return end_time - start_time
 
+def shell_sort(lst):
+    start_time = time.time()
+    gap = len(lst) // 2
+    while gap > 0:
+        for start in range(gap):
+            gap_insertion_sort(lst, start, gap)
+        gap //= 2
+    end_time = time.time()
+    return end_time - start_time
 
-def sequential_search(a_list, item):
-    pos = 0
-    found = False
+def gap_insertion_sort(lst, start, gap):
+    for i in range(start + gap, len(lst), gap):
+        current_value = lst[i]
+        position = i
+        while position >= gap and lst[position - gap] > current_value:
+            lst[position] = lst[position - gap]
+            position -= gap
+        lst[position] = current_value
 
-    while pos < len(a_list) and not found:
-        if a_list[pos] == item:
-            found = True
-        else:
-            pos = pos + 1
+def python_sort(lst):
+    start_time = time.time()
+    lst.sort()
+    end_time = time.time()
+    return end_time - start_time
 
-    return found
+def benchmark_sort(size, num_tests=100):
+    insertion_times = []
+    shell_times = []
+    python_sort_times = []
+    for _ in range(num_tests):
+        lst = get_random_list(size)
+        insertion_times.append(insertion_sort(lst[:]))
+        shell_times.append(shell_sort(lst[:]))
+        python_sort_times.append(python_sort(lst[:]))
+    print(f"List Size: {size}")
+    print(f"Insertion Sort took {sum(insertion_times) / num_tests:10.7f} seconds on average")
+    print(f"Shell Sort took {sum(shell_times) / num_tests:10.7f} seconds on average")
+    print(f"Python Built-in Sort took {sum(python_sort_times) / num_tests:10.7f} seconds on average")
+    print("-" * 60)
 
-
-def ordered_sequential_search(a_list, item):
-    pos = 0
-    found = False
-    stop = False
-    while pos < len(a_list) and not found and not stop:
-        if a_list[pos] == item:
-            found = True
-        else:
-            if a_list[pos] > item:
-                stop = True
-            else:
-                pos = pos + 1
-
-    return found
-
-
-def binary_search_iterative(a_list,item):
-    first = 0
-
-    last = len(a_list) - 1
-    found = False
-    while first <= last and not found:
-        midpoint = (first + last) // 2
-        if a_list[midpoint] == item:
-            found = True
-        else:
-            if item < a_list[midpoint]:
-                last = midpoint - 1
-            else:
-                first = midpoint + 1
-
-    return found
-    
-    
-def binary_search_recursive(a_list,item):
-    if len(a_list) == 0:
-        return False
-    else:
-        midpoint = len(a_list) // 2
-        if a_list[midpoint] == item:
-            return True
-        else:
-            if item < a_list[midpoint]:
-                return binary_search_recursive(a_list[:midpoint], item)
-            else:
-                return binary_search_recursive(a_list[midpoint + 1:], item)
-
+def main():
+    for size in [500, 1000, 5000]:
+        benchmark_sort(size)
 
 if __name__ == "__main__":
-    """Main entry point"""
-    the_size = 500
-
-    total_time = 0
-    for i in range(100):
-        mylist = get_me_random_list(the_size)
-        # sorting is not needed for sequential search.
-        mylist = sorted(mylist)
-
-        start = time.time()
-        check = binary_search_iterative(mylist, 99999999)
-        time_spent = time.time() - start
-        total_time += time_spent
-
-    avg_time = total_time / 100
-    print(f"Binary Search Iterative took {avg_time:10.7f} seconds to run, on average for a list of {the_size} elements")
+    main()
